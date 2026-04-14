@@ -135,6 +135,7 @@ export function renderForPreview(
     markdown: string,
     themeManager: ThemeManager,
     vendorBaseUri: string,
+    fileBaseUri: string,
 ): string {
     const theme = themeManager.activeTheme;
     const fontScale = themeManager.fontScale;
@@ -147,6 +148,7 @@ export function renderForPreview(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="${fileBaseUri}/">
     <title>Preview</title>
     <link rel="stylesheet" href="${vendorBaseUri}/katex/katex.min.css">
     <link rel="stylesheet" href="${vendorBaseUri}/highlight/${hlThemeCss}">

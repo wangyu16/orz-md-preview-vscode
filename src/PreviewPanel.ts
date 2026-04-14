@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { ThemeManager } from './ThemeManager';
 import { renderForPreview, renderMarkdownHtml } from './Renderer';
 import { debounce } from './util/debounce';
@@ -24,6 +25,8 @@ export class PreviewPanel {
         if (existingPanel) {
             this._panel = existingPanel;
         } else {
+            const fileDirUri = vscode.Uri.file(path.dirname(filePath));
+            const workspaceRoots = vscode.workspace.workspaceFolders?.map(f => f.uri) ?? [];
             this._panel = vscode.window.createWebviewPanel(
                 PreviewPanel.viewType,
                 'Orz Preview',
@@ -31,7 +34,11 @@ export class PreviewPanel {
                 {
                     enableScripts: true,
                     retainContextWhenHidden: true,
-                    localResourceRoots: [vscode.Uri.file(ctx.extensionPath)]
+                    localResourceRoots: [
+                        vscode.Uri.file(ctx.extensionPath),
+                        fileDirUri,
+                        ...workspaceRoots,
+                    ]
                 }
             );
         }
@@ -51,8 +58,14 @@ export class PreviewPanel {
             .toString();
     }
 
+    private _fileBaseUri(): string {
+        return this._panel.webview
+            .asWebviewUri(vscode.Uri.file(path.dirname(this.filePath)))
+            .toString();
+    }
+
     private _buildHtml(markdown: string): string {
-        return renderForPreview(markdown, this.themeManager, this._vendorBaseUri());
+        return renderForPreview(markdown, this.themeManager, this._vendorBaseUri(), this._fileBaseUri());
     }
 
     private _updateDebounced = debounce((markdown: string) => {

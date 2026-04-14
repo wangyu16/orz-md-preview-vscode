@@ -2,7 +2,7 @@
   "name": "orz-md-preview",
   "displayName": "Orz Markdown Preview",
   "description": "VS Code markdown preview powered by the orz-markdown parser (themes, KaTeX, Mermaid, SMILES, QR, etc.)",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "yuwang26",
   "author": {
     "name": "Yu Wang",
