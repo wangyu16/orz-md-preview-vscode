@@ -1,0 +1,106 @@
+{
+  "name": "orz-md-preview",
+  "displayName": "Orz Markdown Preview",
+  "description": "VS Code markdown preview powered by the orz-markdown parser (themes, KaTeX, Mermaid, SMILES, QR, etc.)",
+  "version": "1.0.0",
+  "publisher": "yuwang26",
+  "repository": "https://github.com/wangyu16/orz-md-preview-vscode",
+  "icon": "media/icon.png",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "orz-md-preview.openPreview",
+        "title": "Open Preview",
+        "category": "Orz Markdown Preview",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "orz-md-preview.selectTheme",
+        "title": "Select Theme",
+        "category": "Orz Markdown Preview",
+        "icon": "$(symbol-color)"
+      },
+      {
+        "command": "orz-md-preview.fontLarger",
+        "title": "Increase Font Size",
+        "category": "Orz Markdown Preview",
+        "icon": {
+          "light": "media/icon-font-larger.svg",
+          "dark": "media/icon-font-larger-dark.svg"
+        }
+      },
+      {
+        "command": "orz-md-preview.fontSmaller",
+        "title": "Decrease Font Size",
+        "category": "Orz Markdown Preview",
+        "icon": {
+          "light": "media/icon-font-smaller.svg",
+          "dark": "media/icon-font-smaller-dark.svg"
+        }
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "orz-md-preview.openPreview",
+          "when": "editorLangId == markdown",
+          "group": "navigation"
+        },
+        {
+          "command": "orz-md-preview.fontSmaller",
+          "when": "editorLangId == markdown",
+          "group": "navigation"
+        },
+        {
+          "command": "orz-md-preview.fontLarger",
+          "when": "editorLangId == markdown",
+          "group": "navigation"
+        },
+        {
+          "command": "orz-md-preview.selectTheme",
+          "when": "editorLangId == markdown",
+          "group": "navigation"
+        },
+        {
+          "command": "markdown.showPreview",
+          "when": "false",
+          "group": "navigation"
+        },
+        {
+          "command": "markdown.showPreviewToSide",
+          "when": "false",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "package": "node esbuild.mjs --production",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@highlightjs/cdn-assets": "^11.9.0",
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.109.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.20.0",
+    "katex": "^0.16.0",
+    "mermaid": "~9.4.0",
+    "smiles-drawer": "^1.0.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "orz-markdown": "latest"
+  }
+}
