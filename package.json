@@ -4,11 +4,15 @@
   "description": "VS Code markdown preview powered by the orz-markdown parser (themes, KaTeX, Mermaid, SMILES, QR, etc.)",
   "version": "1.0.0",
   "publisher": "yuwang26",
+  "author": {
+    "name": "YuWang26",
+    "email": "yuwang@orz.how"
+  },
   "repository": "https://github.com/wangyu16/orz-md-preview-vscode",
   "icon": "media/icon.png",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.109.0"
   },
   "main": "./out/extension.js",
   "activationEvents": [
