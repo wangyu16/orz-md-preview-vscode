@@ -36,19 +36,73 @@ export function activate(context: vscode.ExtensionContext): OrzMdPreviewApi {
         }
     }
 
-    context.subscriptions.push(
-        vscode.commands.registerCommand('orz-md-preview.selectTheme', async () => {
-            const items = THEMES.map((t, index) => ({
+    // Shared interactive theme picker — each row has a pin button to set the global default.
+    type ThemeItem = vscode.QuickPickItem & { themeIndex: number };
+
+    const PIN_BTN: vscode.QuickInputButton = {
+        iconPath: new vscode.ThemeIcon('pin'),
+        tooltip: 'Set as global default theme',
+    };
+    const PINNED_BTN: vscode.QuickInputButton = {
+        iconPath: new vscode.ThemeIcon('pinned'),
+        tooltip: 'Global default theme (click to re-pin)',
+    };
+
+    function openThemePicker(placeholder: string, onAccept: (index: number) => void): void {
+        const qp = vscode.window.createQuickPick<ThemeItem>();
+        qp.placeholder = placeholder;
+
+        function buildItems(): ThemeItem[] {
+            const defaultIdx = themeManager.defaultThemeIndex;
+            return THEMES.map((t, index) => ({
                 label: `$(symbol-color) ${t.name}`,
                 description: t.colorScheme === 'dark' ? 'Dark' : 'Light',
-                index,
+                themeIndex: index,
+                buttons: [index === defaultIdx ? PINNED_BTN : PIN_BTN],
             }));
-            const selected = await vscode.window.showQuickPick(items, {
-                placeHolder: 'Select a preview theme',
-            });
-            if (selected) {
-                themeManager.setTheme(selected.index);
-            }
+        }
+
+        qp.items = buildItems();
+        const activeItem = qp.items.find(i => i.themeIndex === themeManager.activeThemeIndex);
+        if (activeItem) { qp.activeItems = [activeItem]; }
+
+        qp.onDidTriggerItemButton(e => {
+            const prevActive = qp.activeItems[0];
+            themeManager.setDefaultTheme(e.item.themeIndex);
+            vscode.window.showInformationMessage(`Default theme set to "${THEMES[e.item.themeIndex].name}".`);
+            qp.items = buildItems();
+            const restored = prevActive && qp.items.find(i => i.themeIndex === prevActive.themeIndex);
+            if (restored) { qp.activeItems = [restored]; }
+        });
+
+        qp.onDidAccept(() => {
+            const [selected] = qp.activeItems;
+            if (selected) { onAccept(selected.themeIndex); }
+            qp.dispose();
+        });
+
+        qp.onDidHide(() => qp.dispose());
+        qp.show();
+    }
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('orz-md-preview.selectTheme', () => {
+            openThemePicker(
+                'Select a preview theme — click $(pin) to set as global default',
+                (index) => themeManager.setTheme(index)
+            );
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('orz-md-preview.setDefaultTheme', () => {
+            openThemePicker(
+                'Select the global default theme',
+                (index) => {
+                    themeManager.setDefaultTheme(index);
+                    vscode.window.showInformationMessage(`Default theme set to "${THEMES[index].name}".`);
+                }
+            );
         })
     );
 
@@ -68,7 +122,7 @@ export function activate(context: vscode.ExtensionContext): OrzMdPreviewApi {
 
     const themeItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     themeItem.command = 'orz-md-preview.selectTheme';
-    themeItem.tooltip = 'Select Theme';
+    themeItem.tooltip = 'Select Theme (pin button sets global default)';
     context.subscriptions.push(themeItem);
 
     const fontSmallerItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);

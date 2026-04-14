@@ -40,18 +40,32 @@ export class ThemeManager {
     private _fontScale: number;
 
     constructor(private readonly ctx: vscode.ExtensionContext) {
-        this._activeThemeIndex = ctx.workspaceState.get<number>('orz-md-preview.themeIndex', 6); // default: Light Academic I
+        const globalDefault = ctx.globalState.get<number>('orz-md-preview.defaultThemeIndex', 6);
+        this._activeThemeIndex = ctx.workspaceState.get<number | undefined>('orz-md-preview.themeIndex') ?? globalDefault;
         this._fontScale = ctx.workspaceState.get<number>('orz-md-preview.fontScale', 1.0);
     }
 
     get activeThemeIndex(): number { return this._activeThemeIndex; }
     get activeTheme(): ThemeDefinition { return getTheme(this._activeThemeIndex); }
     get fontScale(): number { return this._fontScale; }
+    get defaultThemeIndex(): number {
+        return this.ctx.globalState.get<number>('orz-md-preview.defaultThemeIndex', 6);
+    }
 
     setTheme(index: number) {
         if (index !== this._activeThemeIndex && index >= 0 && index < THEMES.length) {
             this._activeThemeIndex = index;
             this.ctx.workspaceState.update('orz-md-preview.themeIndex', index);
+            this._onThemeChanged.fire(this.activeTheme);
+        }
+    }
+
+    setDefaultTheme(index: number) {
+        if (index >= 0 && index < THEMES.length) {
+            this.ctx.globalState.update('orz-md-preview.defaultThemeIndex', index);
+            // Also clear the workspace override so the new global default takes effect here too
+            this.ctx.workspaceState.update('orz-md-preview.themeIndex', undefined);
+            this._activeThemeIndex = index;
             this._onThemeChanged.fire(this.activeTheme);
         }
     }
