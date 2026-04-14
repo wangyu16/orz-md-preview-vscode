@@ -1,9 +1,5 @@
 import { md } from 'orz-markdown';
-import { getBrowserRuntimeScript } from 'orz-markdown/runtime';
 import { ThemeManager } from './ThemeManager';
-
-// QR code interactivity IIFE — cached at module load
-const BROWSER_RUNTIME_JS = getBrowserRuntimeScript();
 
 const TABS_JS = `
 (function () {
@@ -120,7 +116,6 @@ const MESSAGE_HANDLER_JS = `
         }
         if (typeof window._orzTabsInit === 'function') { window._orzTabsInit(); }
         if (typeof window._orzRenderInit === 'function') { window._orzRenderInit(); }
-        if (typeof window.OrzMarkdownRuntime !== 'undefined') { window.OrzMarkdownRuntime.init(body); }
         window.scrollTo(0, scrollY);
     });
 })();
@@ -161,6 +156,9 @@ ${css}
     <style>
         :root { --font-scale: ${fontScale}; }
         html, body { background: ${theme.previewBg}; margin: 0; }
+        /* QR click-to-enlarge is disabled in preview; hide the expand badge */
+        .qrcode__icon { display: none !important; }
+        .markdown-body span.qrcode { cursor: default; }
     </style>
 </head>
 <body>
@@ -173,7 +171,6 @@ ${mdHtml}
     <script src="${vendorBaseUri}/smiles-drawer/smiles-drawer.min.js"></script>
     <script>${TABS_JS}</script>
     <script>${RENDER_JS}</script>
-    <script>${BROWSER_RUNTIME_JS}</script>
     <script>${MESSAGE_HANDLER_JS}</script>
 </body>
 </html>`;

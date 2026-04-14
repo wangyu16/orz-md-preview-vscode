@@ -16,13 +16,25 @@ export function activate(context: vscode.ExtensionContext): OrzMdPreviewApi {
 
     // ── Commands ──────────────────────────────────────────────────────────────
 
+    const openPreviewHandler = () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor || editor.document.languageId !== 'markdown') { return; }
+        previewManager.openOrReveal(editor, vscode.ViewColumn.Beside);
+    };
+
     context.subscriptions.push(
-        vscode.commands.registerCommand('orz-md-preview.openPreview', () => {
-            const editor = vscode.window.activeTextEditor;
-            if (!editor || editor.document.languageId !== 'markdown') { return; }
-            previewManager.openOrReveal(editor, vscode.ViewColumn.Beside);
-        })
+        vscode.commands.registerCommand('orz-md-preview.openPreview', openPreviewHandler)
     );
+
+    // Override built-in markdown preview commands so the built-in toolbar icons
+    // also open the custom preview instead of VS Code's default one.
+    for (const id of ['markdown.showPreview', 'markdown.showPreviewToSide']) {
+        try {
+            context.subscriptions.push(vscode.commands.registerCommand(id, openPreviewHandler));
+        } catch {
+            // Already registered by VS Code's built-in markdown extension; ignore.
+        }
+    }
 
     context.subscriptions.push(
         vscode.commands.registerCommand('orz-md-preview.selectTheme', async () => {
